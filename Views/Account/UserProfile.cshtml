@@ -1,0 +1,159 @@
+﻿
+@using TwitterBootstrap2
+@using TwitterBootstrapMVC
+@model NTU.Models.UserDetails
+@{
+    ViewBag.Title = "Profile";
+    var roleList = new List<SelectListItem>
+   {
+      
+       new SelectListItem
+       {
+           Text = "Quality Team",
+           Value = "1"
+       },
+       new SelectListItem
+       {
+           Text = "Student",
+           Value = "2"
+       },
+       new SelectListItem
+       {
+           Text = "Teacher",
+           Value = "3"
+       }
+   };
+}
+<script src="~/Scripts/jquery-1.8.0.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+ <div id="MessageStatus">
+            
+        </div>
+<div style="width: 1075px;margin : 0 auto; margin-top: 40px;">
+<div style="font-size: 20px;color:#fff;padding: 10px;background-color: #882843;height: 30px;">Profile Information</div>
+<div id="Profile" style="font-size: 15px;padding: 10px;background-color: #FFF;">
+   
+    @using (Ajax.BeginForm("UpdateProfile", "Account", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        UpdateTargetId = "result",
+        OnSuccess = "ProfileUpdatedSuccess(data)"
+    } ))
+    {
+        @Html.AntiForgeryToken()
+       
+        <table>
+            <tr><td>
+                    <div class="control-group">
+                        <div class="controls">
+                            @Html.Label("First Name")
+                            @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.FirstName).Tooltip(new Tooltip("First Name").Placement("top")).HtmlAttributes(new {@class = "inputProfile"}).Value(@Model.RegisterViewModel.FirstName).ShowValidationMessage(true)
+                        </div>
+                    </div></td><td>
+                                   <div class="control-group">
+                                       <div class="controls">
+                                           @Html.Label("Last Name")
+                                           @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.LastName).Tooltip(new Tooltip("Last Name").Placement("top")).HtmlAttributes(new {@class = "inputProfile"}).Value(@Model.RegisterViewModel.LastName).ShowValidationMessage(true)
+                                       </div>
+                                   </div></td></tr>
+            <tr><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("User Name")
+                    @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.UserName).Tooltip(new Tooltip("User Name").Placement("top")).HtmlAttributes(new {@class = "inputProfile",@disabled="true"}).Value(@Model.RegisterViewModel.UserName).ShowValidationMessage(true)
+                </div>
+            </div></td><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Email Address")
+                    @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.EmailAddress).Tooltip(new Tooltip("Email Address").Placement("top")).HtmlAttributes(new {@class = "inputProfile",@disabled = "true"}).HtmlAttributes(new {@value = @Model.RegisterViewModel.EmailAddress}).ShowValidationMessage(true)
+                </div>
+            </div></td></tr>
+                <tr><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Password")
+                    @Html.Bootstrap().PasswordFor(m => m.RegisterViewModel.Password).Tooltip(new Tooltip("Password").Placement("top")).HtmlAttributes(new {@class = "inputProfile"}).HtmlAttributes(new {@value = @Model.RegisterViewModel.Password}).ShowValidationMessage(true)
+                </div>
+            </div></td><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Confirm Password")
+                    @Html.Bootstrap().PasswordFor(m => m.RegisterViewModel.ConfirmPassword).Tooltip(new Tooltip("Confirm Password").Placement("top")).HtmlAttributes(new {@class = "inputProfile"}).HtmlAttributes(new {@value = @Model.RegisterViewModel.ConfirmPassword}).ShowValidationMessage(true)
+                </div>
+            </div></td></tr>
+            <tr><td>
+                    <div class="control-group">
+                        <div class="controls">
+                            @Html.Label("Role")
+                            @Html.Bootstrap().DropDownListFor(m=> m.RegisterViewModel.RoleId,  roleList).HtmlAttributes(new {@class = "inputProfile",@disabled="true"}).HtmlAttributes(new {@value = @Model.RegisterViewModel.RoleId}).ShowValidationMessage(true)
+                        </div>
+                    </div>
+                </td><td><div class="control-group">
+                             <div class="controls">
+                                 @Html.Label("Phone Number")
+                                 @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.PhoneNumber).Tooltip(new Tooltip("Phone Number").Placement("top")).HtmlAttributes(new {@class = "inputProfile"}).Value(@Model.RegisterViewModel.PhoneNumber).ShowValidationMessage(true)
+                             </div>
+                         </div></td>
+              </tr>
+           @if (@Model.RegisterViewModel.RoleId == 2)
+                {  <tr><td>
+                    <div class="control-group">
+                        <div class="controls">
+                            @Html.Label("Roll Number")
+                            @Html.Bootstrap().TextBoxFor(m => m.StudentViewModel.RollNumber).Tooltip(new Tooltip("Roll Number").Placement("top")).HtmlAttributes(new {@class = "inputProfile",@disabled = "true"}).HtmlAttributes(new {@value = @Model.StudentViewModel.RollNumber}).ShowValidationMessage(true)
+                        </div>
+                    </div>
+                </td><td>
+                         <div class="control-group">
+                             <div class="controls" >
+                                 @Html.Label("Semmester")
+                            
+                                 @Html.Bootstrap().TextBoxFor(m=> m.StudentViewModel.Semester).Tooltip(new Tooltip("Semmester").Placement("top")).HtmlAttributes(new {@class = "inputProfile",@disabled = "true"}).HtmlAttributes(new {@value = @Model.StudentViewModel.Semester}).ShowValidationMessage(true)
+                             </div>
+                         </div>
+                    </td></tr>}
+            <tr><td>
+                         @if (@Model.RegisterViewModel.RoleId == 2)
+                {
+
+                    
+                        <div class="control-group">
+                            <div class="controls">
+                                @Html.Label("Department")
+                            
+                                @Html.Bootstrap().DropDownListFor(m => m.StudentViewModel.DepartmentId, new SelectList((System.Collections.IEnumerable) ViewData["DepartmentList"], "Value", "Text")).HtmlAttributes(new {@class = "inputProfile",@disabled="true"}).HtmlAttributes(new {@value = @Model.StudentViewModel.DepartmentId}).ShowValidationMessage(true)
+                            </div>
+                        </div>
+                    
+                }  
+                     </td><td>
+                           <div class="control-group">
+                <div class="controls">
+                           @Html.Bootstrap().SubmitButton().Text("UPDATE PROFILE").HtmlAttributes(new{@class="button", @style="margin-top : 30px;margin-left : 0px;height:50px;width : 415px !important;"})
+                     </div>
+            </div>   </td></tr> </table>
+    }
+   
+</div></div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+<script type="text/javascript">
+    function ProfileUpdatedSuccess(data) {
+        $("#MessageStatus").dialog({ modal: true,
+        show: { effect: "fadeIn", duration: 1000 },
+        hide: {
+                effect: 'blind',
+                duration: 1000
+        },
+        title: "Update Profile Status",
+        width: "auto",
+        height: "auto"
+        });
+        $("#MessageStatus").html(data.param1);
+    }
+
+    console.log('@Session["UserId"]');
+</script>

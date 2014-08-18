@@ -1,0 +1,235 @@
+﻿@using TwitterBootstrap2
+@using TwitterBootstrapMVC
+@model NTU.Models.Section
+@{
+    ViewBag.Title = "Section";
+}
+<script src="~/Scripts/jquery-1.8.0.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+@Html.Bootstrap().Button().Id("AddSectionButton").Text("Add Section").HtmlAttributes(new{@style="position: absolute;z-index:99;margin-left:250px; margin-top:8px;"})
+
+
+
+<div id="MessageStatus"></div>
+
+<div id="AddSection" style="display: none;">
+
+    @using (Ajax.BeginForm("UpdateSection", "Section", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "SectionUpdatedSuccess(data, status, xhr)"
+    }))
+    {
+        @Html.AntiForgeryToken()
+        <table>
+           
+            <tr><td>
+                         <div class="control-group">
+                             <div class="controls">
+                                 
+                            @Html.HiddenFor(m => m.SectionId)
+                                 @Html.Label("Section Name")
+                                 @Html.Bootstrap().TextBoxFor(m => m.SectionName).Tooltip(new Tooltip("Section Name").Placement("top")).ShowValidationMessage(true)
+                             </div>
+                         </div>
+                     </td></tr>
+            <tr><td>
+                    
+                   @Html.Bootstrap().SubmitButton().Text("SAVE").HtmlAttributes(new { @id="AddSectionButton", @class = "button", @style = "margin-top : 30px;margin-bottom : 30px;" })
+       
+                 </td><tr> </table>
+    }
+
+</div>
+
+<div id="SectionsTable" style = "margin: 30px auto 45px;width: 90%;">
+    <input type="hidden" id="SubmitStatus"/>
+    @using (Html.Bootstrap().Begin(new Table().Bordered().Hover().HtmlAttributes(new { @id = "tblSectionCollection", @class = "display stripe order-column"  })))
+    {
+
+        <thead>           
+            <tr>
+                <th>Sr No.</th>
+                <th>Section name</th>
+                <th>Created On</th>
+                <th>Last Updated</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="SectionInfo">
+            
+        </tbody>
+    }
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+<script type="text/javascript">
+    window.onload = function () {
+        GetAllSections();
+    };
+    GetAllSections = function () {
+        $.ajax({
+            type: "POST",
+            url: "GetAllSections",
+            contentType: "application/json; charset=utf-8",
+            //traditional: true,
+            dataType: "json",
+            beforeSend: function() { $.showprogress(); },
+            success: function(msg) {
+                // Replace the div's content with the page method's return.
+                if (msg != null) {
+                    $("#SectionInfo").html("");
+                    $('#tblSectionCollection').dataTable().fnDestroy();
+                    $('#SectionInfo').html(msg);
+                    $('#tblSectionCollection').dataTable({
+                        "iDisplayLength": 10,
+                        "aLengthMenu": [10, 25, 50, 100],
+                        "sPaginationType": "full_numbers",
+                        "oLanguage": {
+                            "sZeroRecords": "No records to display"
+                        },
+                        "sDom": '<"H"Tlf>t<"F"ip>',
+                        "oTableTools": {
+                            "sSwfPath": "../Content/copy_csv_xls_pdf.swf",
+                            "aButtons": [
+			"copy", "xls", "pdf"
+                            ]
+                        },
+                        "bDestroy": true,
+                        "bJQueryUI": true
+                    });
+                    $('#tblSectionCollection').css("width", "100%");
+                    $('#tblSectionCollection').css("margin-bottom", "0");
+                }
+
+                $.hideprogress();
+            },
+            error: function(x, e) {
+                alert("The call to the server side failed. " + x.responseText);
+            }
+        });
+
+    };
+    function SectionUpdatedSuccess(data, status, xhr) {
+        $("#AddSection").dialog("close");
+          //  $("html, body").animate({ scrollTop: 10 }, "fast");
+            $("#MessageStatus").dialog({
+                title: "Message Status",
+                show: { effect: "fadeIn", duration: 1000 },
+                hide: {
+                    effect: 'blind',
+                    duration: 1000
+                },
+                modal: true,
+                
+            });
+
+            $("#MessageStatus").html(data.param1);
+            GetAllSections();
+        
+        //setTimeout(showNotifications, 5000);
+        //function showNotifications() {
+        //    $("#UpdateStatusDiv").hide();
+        //}
+       // }
+        
+    }
+
+    $('#AddSectionButton').click(function () {
+        $("#SectionId").val("0");
+        $('#AddSection').dialog({
+            modal: true, 
+            show: { effect: "fadeIn", duration: 1000 },
+            hide: {
+                effect: 'blind',
+                duration: 1000
+            },
+            title : "Add Section",
+            width: "auto",
+            height: "auto"
+        });
+        resetCssOfFields(new Array("SectionName"));
+
+        $("html, body").animate({ scrollTop: 10 }, "fast");
+   
+    });
+    
+    EditSection = function (id) {
+        $("#SectionId").val(id);
+        resetCssOfFields(new Array("SectionName"));
+        $.ajax({
+            url: 'EditSection',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (msg) {
+                $('#AddSection').dialog({
+                    modal: true,
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    title: "Edit Section",
+                    width: "auto",
+                    height:"auto"
+                });
+
+                $("html, body").animate({ scrollTop: 10 }, "fast");
+                $("#SectionName").val(msg["SectionName"]);
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+    
+    DeleteSection = function (id) {
+            var r = confirm("Are you sure, You want to Delete this Section.");
+        if (!r)
+            return false;
+        $.ajax({
+            url: 'DeleteSection',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function() { $.showprogress(); },
+            success: function (data, status, xhr) {
+
+                $("#MessageStatus").dialog({
+                    title: "Delete Section Status",
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    modal: true,
+
+                });
+                $("#MessageStatus").html(data.param1);
+                GetAllSections();
+                $.hideprogress();
+            },
+            error: function(x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+
+</script>
+
+

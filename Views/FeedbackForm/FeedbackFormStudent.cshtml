@@ -1,0 +1,205 @@
+﻿@using NTU.Models
+@using TwitterBootstrap2
+@model List<CustomFeedbackFormResults>
+
+@{
+    ViewBag.Title = "Feedback Form";
+   
+}
+<style type="text/css">
+  
+    #tblCourseContentFeedback td {
+        border: 1px solid #ccc;
+        text-align: left;
+    }
+     
+</style>
+<script src="~/Scripts/jquery-1.8.0.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div style="text-align: center;margin-top: 50px;" >
+    <div id="MessageStatus"></div>
+    <span style="padding: 10px; font-size: 17px;font-weight: bold;">Course: </span>
+      @Html.DropDownList("CourseDropdown", new SelectList((System.Collections.IEnumerable) ViewData["CourseList"], "Value", "Text"), "---Select One---",new { @onchange="ChangeCourse(this.value);",@style="width: 300px !important;" })
+   <div id="FeedbackForm" style="display: none;">
+     <h3 style="text-align: left;padding-left: 20px;">Feedback Form</h3>
+    
+    <form>
+            <table id = "tblCourseContentFeedback" class="display">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th style="width: 570px" >Question</th>
+                        
+                        <th style="width: 130px">Strongly Agree</th>
+                        <th>Agree</th>
+                        <th>Neutral</th>
+                        <th>Disagree</th>
+                        <th style="width: 130px">Strongly Disagree</th>
+
+                    </tr>
+                </thead>
+
+                <tbody>
+    
+    
+
+    
+                    @for (var i=0;i< Model.Count;i++)
+                    {
+                        <tr style="height: 40px">
+                            <td style="text-align: center;">@(i+1) </td>
+                            <td>@Model[i].QuestionText</td>
+
+                            <td style="text-align: center;">@Html.Bootstrap().RadioButton(Convert.ToString(@Model[i].QuestionId),"1")</td>
+                            <td style="text-align: center;">@Html.Bootstrap().RadioButton(Convert.ToString(@Model[i].QuestionId),"2")</td>
+                            <td style="text-align: center;">@Html.Bootstrap().RadioButton(Convert.ToString(@Model[i].QuestionId),"3")</td>
+                            <td style="text-align: center;">@Html.Bootstrap().RadioButton(Convert.ToString(@Model[i].QuestionId),"4")</td>
+                            <td style="text-align: center;">@Html.Bootstrap().RadioButton(Convert.ToString(@Model[i].QuestionId),"5")</td>
+                        </tr>
+            
+                    }
+                </tbody>
+            </table>
+        
+
+            @Html.Bootstrap().Button().Text("SUBMIT").Id("SubmitFeedbackForm").HtmlAttributes(new{@style="background-color: #468847;color: #fff;height: 50px;margin: 30px;padding: 15px;width: 500px;"})
+        </form>
+   </div>
+</div>
+<script type="text/javascript">
+    var allradioSelect = false;
+    ChangeCourse = function (id) {
+        if (id == "") {
+            $("#FeedbackForm").hide();
+            return false;
+        }
+       
+        $.ajax({
+            url: 'CheckFormSubmitted',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+                if (data.param1 != "OK") {
+                    $("#MessageStatus").dialog({
+                        title: "Feedback Form Status",
+                        modal: true,
+                        show: { effect: "fadeIn", duration: 1000 },
+                        hide: {
+                            effect: 'blind',
+                            duration: 1000
+                        }
+
+                    });
+                    $("#MessageStatus").html(data.param1);
+                    $("#FeedbackForm").hide();
+                } else {
+                    $("#FeedbackForm").show();
+                }
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+      
+       
+
+    };
+    $("#SubmitFeedbackForm").click(function() {
+        var courseId = $("#CourseDropdown").val();
+       
+        if (allradioSelect) {
+            var objOption;
+            var objFeedbackForm = new Array();
+            for (var i = 0; i < $(':radio:checked').length; i++) {
+                objOption = {};
+                objOption.CourseId = parseInt(courseId);
+                objOption.QuestionId = parseInt($(':radio:checked')[i].name);
+                objOption.OptionId = parseInt($(':radio:checked')[i].value);
+                objFeedbackForm.push(objOption);
+
+            }
+            $.ajax({
+                url: 'SubmitFeedbackForm',
+                type: "POST",
+                data: "{objFeedbackForm:" + JSON.stringify(objFeedbackForm)
+                + "}",
+                contentType: "application/json; charset=utf-8",
+                //traditional: true,
+                dataType: "json",
+
+                beforeSend: function () { $.showprogress(); },
+                success: function (data) {
+                    $('#MessageStatus').dialog({
+                        modal: true,
+                        position: "center",
+                        show: { effect: "fadeIn", duration: 1000 },
+                        hide: {
+                            effect: 'blind',
+                            duration: 1000
+                        },
+                        width: "auto",
+                        height: "auto",
+                        title: "Course Assignment Status"
+                    });
+                    $('#MessageStatus').html(data.param1);
+                    $.hideprogress();
+                },
+                error: function (x) {
+                    alert("The call to the server side failed. " + x.responseText);
+
+                }
+            });
+            return true;
+        }
+        else {
+            $("#MessageStatus").dialog({
+                title: "Feedback Form Status",
+                modal: true,
+                show: { effect: "fadeIn", duration: 1000 },
+                hide: {
+                    effect: 'blind',
+                    duration: 1000
+                }
+
+            });
+            $("#MessageStatus").html("<p style=\"color:red;font-weight:bold;\">All questions are not answered. Please answer all questions, then submit.</p>");
+            return false;
+        }
+    });
+    $(":radio").change(function () {
+        var names = {};
+        $(':radio').each(function () {
+            names[$(this).attr('name')] = true;
+        });
+        var count = 0;
+        $.each(names, function () {
+            count++;
+        });
+        if ($(':radio:checked').length === count) {
+            allradioSelect = true;
+        }
+    }).change();
+    window.onload = function() {
+
+
+       $("#tblCourseContentFeedback").dataTable({
+            "iDisplayLength": 50,
+            "aLengthMenu": [50, 75, 100, 150],
+            "sPaginationType": "full_numbers",
+            "bDestroy": true,
+            "bJQueryUI": true
+        });
+        $('#tblCourseContentFeedback_wrapper').css({
+            width: "1300px",
+            margin: "0 auto"
+        });
+    };
+
+
+</script>

@@ -1,0 +1,83 @@
+﻿@using NTU.Models
+
+@{
+    var currentUser = (UserSession)HttpContext.Current.Session["User"];
+
+}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>@ViewBag.Title</title>
+        <meta name="viewport" content="width=device-width" />
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        <link href="~/Content/loadingbox.css" rel="stylesheet" />
+        @Styles.Render( "~/Content/themes/base/css","~/Content/bootstrap")
+        <style type="text/css">
+            .ActiveTab {
+                background-color: #882843 !important;
+                color: white !important;
+            }
+        </style>
+       
+    </head>
+    <body>
+        <div style="background-color: #DEDEDE;">
+            <div class="Header">
+            
+                <div style="float:right;padding-right: 30px; padding-top: 16px;">
+                   
+                    <h5 style="color:white;width: 100%;">Wecome @currentUser.UserName  | <a href='@Url.Action("LogOff","Account")' style="  color:White;font-family:Verdana;font-size:14px;" ><u>Logout</u></a></h5>  
+                </div> 
+            </div>
+             <div class="rmm">
+            <ul id="MenuUI">
+                <li ><a id="UserProfile" href='~/Account/UserProfile'>Home</a></li>
+                @if (@currentUser.RoleId == 1)
+                {
+                <li ><a id="Users" href='~/User/Index'>Users</a></li>
+                <li ><a id="Teachers" href='~/Teacher/TeacherIndex'>Teachers</a></li>
+                <li ><a id="Students" href='~/Student/StudentIndex'>Students</a></li>
+                <li ><a id="Courses" href='~/Courses/CoursesIndex'>Courses</a></li>
+                    <li ><a id="Sections" href='~/Section/SectionIndex'>Sections</a></li>
+                    <li ><a id="CourseAssignment" href='~/Courses/CoursesAssignment'>Assign Course</a></li>
+                    <li ><a id="FeedbackFormAdmin" href='~/FeedbackForm/FeedbackFormAdmin'>Feedback Form</a></li>
+                    <li ><a id="Departments" href='~/Department/DepartmentIndex'>Departments</a></li>
+                }
+                @if (@currentUser.RoleId == 2)
+                {
+
+                <li ><a id="FeedbackFormStudent" href='~/FeedbackForm/FeedbackFormStudent'>Feedback Form</a></li>
+                }
+                @if (@currentUser.RoleId == 3)
+                {
+                    <li ><a id="ViewPerformance" href='~/Teacher/ViewPerformance'>View Performance</a></li>
+                }
+                <li ><a href='~/Account/LogOff'>Logout</a></li>
+            </ul>
+        </div>
+            <div data-role="content" style="min-height: 450px;margin-bottom: 30px; margin-top: 10px;">
+               
+                @RenderBody()
+            </div>
+          
+                  <div id="footerMaster" class="Footer">
+© NTU. All rights reserved.
+</div> </div>
+       
+  
+        @Scripts.Render("~/bundles/jquery", "~/bundles/jqueryui", "~/bundles/bootstrap", "~/bundles/JqueryExtras", "~/bundles/MenuJs")
+        @RenderSection("scripts", false)
+        
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("li>#" + '@ViewBag.SelectedTab').addClass("ActiveTab");
+                $("li>a").click(function () {
+                    $('#MenuUI').find('li>a').removeClass("ActiveTab");
+                    $(this).addClass("ActiveTab");
+                });
+jQuery.curCSS = jQuery.css;
+            });
+        </script>
+    </body>
+</html>

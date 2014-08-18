@@ -1,0 +1,196 @@
+﻿@using TwitterBootstrap2
+@model NTU.Models.CourseAssignment
+@{
+    ViewBag.Title = "CoursesAssignment";
+  
+}
+<style type="text/css">
+    select {
+        height: 40px;
+        line-height: 30px;
+        padding: 10px;
+        width: 300px;
+    }
+</style>
+<div id="MessageStatus" style="width: 330px;"></div>
+<center >
+    <table style="width: 400px;padding: 40px;">
+       
+        <tr>
+            <td>
+                @Html.LabelFor(model => model.Course.DepartmentId, "Department") 
+            </td>
+            <td>
+                @Html.DropDownListFor(model => model.Course.DepartmentId, new SelectList((System.Collections.IEnumerable) ViewData["DepartmentList"], "Value", "Text"), "---Select One---",new { @onchange="ChangeDept(this.value);" })
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.LabelFor(model => model.Course.CourseId, "Course") 
+            </td>
+            <td>
+                <select id="Course_CourseId" name="Course_CourseId">
+                </select>  </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.LabelFor(model => model.Section.SectionId, "Section") 
+            </td>
+            <td>
+                @Html.DropDownListFor(model => model.Section.SectionId, new SelectList((System.Collections.IEnumerable) ViewData["SectionList"], "Value", "Text"), "---Select One---")
+            </td>
+        </tr> 
+        <tr>
+            <td>
+                @Html.Label("User Type:")  
+            </td>
+            <td>
+                <select id="UserType" onchange="LoadUsers(this.value);">
+                    <option value="0">---Select One---</option>
+                    <option value="1">Student</option>
+                    <option value="2">Teacher</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.Label("User") 
+            </td>
+            <td>
+                <select id="User">
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td>
+                <img style="float:right;margin-top:20px;cursor:pointer;" src="~/Images/save.png" alt="Save" onclick="AssignCourse()"/>
+            </td>
+        </tr>
+    </table>
+                        
+   
+
+
+</center>
+
+<script type="text/javascript">
+    LoadUsers = function (id) {
+        var deptId = $("#Course_DepartmentId").val();
+        if (id == "0" || deptId == "") {
+            $('#User').children().remove();
+            return false;
+        }
+     
+        $.ajax({
+            url: 'Loadusers',
+            type: 'POST',
+            data: {
+                id: id,
+                deptId: deptId
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+                $('#User').html(data);
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+    };
+
+    AssignCourse = function () {
+        var courseId = $("#Course_CourseId").val();
+        var sectionId = $("#Section_SectionId").val();
+        var userTypeId = $("#UserType").val();
+        var userId = $("#User").val();
+        if (courseId == "" || courseId == null || sectionId == "" || userTypeId == "0" || userId == "0") {
+            var message = "";
+            if (courseId == null)
+                message = "department in which courses are offered";
+            else if (courseId == "")
+                message = "Course";
+            else if (sectionId == "")
+                message = "Section";
+            else if (userTypeId == "0")
+                message = "User Type";
+            else if (userId == "0")
+                message = "User";
+            $('#MessageStatus').dialog({
+                modal: true,
+                position: "center",
+                show: { effect: "fadeIn", duration: 1000 },
+                hide: {
+                    effect: 'blind',
+                    duration: 1000
+                },
+                title: "Error"
+            });
+            $('#MessageStatus').html("<div style=\"color:red;font-weight:bold;\">Please Select the "+ message +".</div>");
+            return false;
+        }
+        $.ajax({
+            url: 'AssignCourse',
+            type: 'POST',
+            data: {
+                courseId: courseId,
+                sectionId: sectionId,
+                userTypeId: userTypeId,
+                userId: userId
+
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+                $('#MessageStatus').dialog({
+                    modal: true,
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    position: "center",
+                    title: "Course Assignment Status"
+                });
+                $('#MessageStatus').html(data);
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+    };
+
+    ChangeDept  = function (id) {
+       // var id = $("#Course_DepartmentId").val();
+        if (id == "") {
+            $('#Course_CourseId').children().remove();
+            return false;
+        }
+        $("#UserType").val("0");
+        $('#User').children().remove();
+        $.ajax({
+            url: 'LoadCourses',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+                $('#Course_CourseId').html(data);
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+
+    };
+</script>

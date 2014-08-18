@@ -1,0 +1,75 @@
+﻿@using NTU.Models
+
+@{
+    var currentUser = (UserSession)HttpContext.Current.Session["User"];
+
+}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>@ViewBag.Title</title>
+        <meta name="viewport" content="width=device-width" />
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        
+        @Styles.Render( "~/Content/bootstrap")
+     
+       
+    </head>
+    <body>
+        <div style="background-color: #FFF;">
+            <div class="Header">
+                @*<div style="float: left;padding-left: 30px; width: 75px; padding-top: 10px;">
+                    <img src='@Url.Content("~/Images/Ntu.png")' style="width : 100%;" alt="Header Logo">
+                </div>*@
+                <div style="float:right;padding-right: 30px; padding-top: 16px;">
+                   
+                    <h5 style="color:white;width: 100%;">Welcome @currentUser.UserName  | <a href='@Url.Action("LogOff","Account")' style="  color:White;font-family:Verdana;font-size:14px;" ><u>Logout</u></a></h5>  
+                </div> 
+            </div>
+             <div class="rmm">
+         <ul id="MenuUI">
+                <li ><a id="UserProfile" href='~/Account/UserProfile'>Home</a></li>
+                @if (@currentUser.RoleId == 1)
+                {
+                <li ><a id="Users" href='~/User/Index'>Users</a></li>
+                <li ><a id="Teachers" href='~/Teacher/TeacherIndex'>Teachers</a></li>
+                <li ><a id="Students" href='~/Student/StudentIndex'>Students</a></li>
+                <li ><a id="Courses" href='~/Courses/CoursesIndex'>Courses</a></li>
+                <li ><a id="Sections" href='~/Home/Index'>Sections</a></li>
+                }
+                @if (@currentUser.RoleId == 2){
+
+                <li ><a id="FeedbackForm" href='~/Student/FeedbackForm'>Feedback Form</a></li>
+                }
+                @if (@currentUser.RoleId == 3){
+                    <li ><a id="ViewPerformaance" href='~/Teacher/ViewPerformance'>View Performance</a></li>
+                }
+                <li ><a href='~/Account/LogOff'>Logout</a></li>
+            </ul>
+        </div>
+            <div data-role="content" style="min-height: 450px;margin-bottom: 30px; margin-top: 10px;">
+               
+                @RenderBody()
+            </div>
+          
+                  <div id="footerMaster" class="Footer">
+© NTU. All rights reserved.
+</div> </div>
+       
+      
+        @Scripts.Render("~/bundles/jquery",  "~/bundles/bootstrap","~/bundles/JqueryExtras",  "~/bundles/MenuJs")
+        @RenderSection("scripts", false)
+        
+      <script type="text/javascript">
+          $(document).ready(function () {
+              $("li>#" + '@ViewBag.SelectedTab').addClass("ActiveTab");
+                $("li>a").click(function () {
+                    $('#MenuUI').find('li>a').removeClass("ActiveTab");
+                    $(this).addClass("ActiveTab");
+                });
+
+            });
+        </script>
+    </body>
+</html>

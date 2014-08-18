@@ -1,0 +1,292 @@
+﻿@using TwitterBootstrap2
+@using TwitterBootstrapMVC
+@model NTU.Models.LoginModel
+
+@{
+    Layout = "~/Views/Shared/LoginLayout.cshtml";
+}
+
+<script src="~/Scripts/jquery-1.8.0.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+ @using (Ajax.BeginForm("Login", "Account", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "LoginStatus(data)"
+    }))
+{
+    @Html.AntiForgeryToken()
+      <div id="MessageStatus"></div>
+        <center>
+        <div id="LoginDivWrapper" class ="ChatImage">
+            <div style="text-align: center;  padding : 15px;" >
+                
+                <img src='@Url.Content("~/Images/Ntu.png")' width=100 height=100 alt="Account Logo">
+            </div>
+    
+            <div class="control-group" style="margin: 15px;">
+                <div class="controls">
+                    @Html.Bootstrap().TextBoxFor(model => model.EmailAddress).Placeholder("Email Address").Tooltip(new Tooltip("Email Address").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>  
+            <div class="control-group" style="margin: 15px;">
+                <div class="controls">
+                    @Html.Bootstrap().PasswordFor(m => m.Password).Placeholder("Password").Tooltip(new Tooltip("Password").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+            <div class="control-group" style="margin: 15px;">
+                <div class="controls">
+                    @Html.Bootstrap().SubmitButton().Text("LOGIN").HtmlAttributes(new{@class="button"})
+                </div>
+            </div>
+            <p style="margin-top: 15px;margin-bottom: 40px;">
+                @Html.ActionLink("Forgot Password??", "ForgotPassword", "Account", null, new { @id = "ForgotPasswordLink" }) 
+            </p>
+        </div> 
+   
+         </center>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+   
+}
+<script type="text/javascript">
+    function LoginStatus(data) {
+        if (data.param1 == "<p style=\"color:red;font-weight:bold;\">The Email Address or Password provided is Incorrect.</p>") {
+            $("#MessageStatus").dialog({
+                title: "Message Status",
+                show: { effect: "fadeIn", duration: 1000 },
+                hide: {
+                    effect: 'blind',
+                    duration: 1000
+                },
+                modal: true,
+
+            });
+
+            $("#MessageStatus").html(data.param1);
+        } else {
+            window.location = "Account/UserProfile";
+        }
+
+    }
+
+</script>
+
+
+   @* 
+
+
+  
+@using (Html.BeginForm(
+    "Login", "Account", FormMethod.Post, new { name = "LoginForm" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="ImageContainer">
+        <div id="LoginDivWrapper" class ="ChatImage">
+            <div style="text-align: center;  padding : 15px;" >
+                
+          <img src='@Url.Content("~/Images/Ntu.png")' width="15%" height="15%" alt="Account Logo">
+            </div>
+    
+            @if (@ViewBag.Error != null & @ViewBag.Error != "")
+            {
+                @Html.Bootstrap().Label(@ViewBag.Error).HtmlAttributes(new{@style="text-align:center;color:red;"})
+            
+            } 
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Bootstrap().TextBoxFor(model => model.EmailAddress).Placeholder("Email Address").Tooltip(new Tooltip("Email Address").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>  
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Bootstrap().PasswordFor(m => m.Password).Placeholder("Password").Tooltip(new Tooltip("Password").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+            @Html.Bootstrap().SubmitButton().Text("LOGIN").HtmlAttributes(new{@class="button",@style="margin-bottom:30px;"})
+                   
+       
+            @*    <input type="submit" value="LOGIN" />
+            <p style="margin-top: 20px;">
+                @Html.ActionLink("Register", "Register", "Account", null, new { @id = "SignUpLink", @class = "Link" }) 
+                @Html.ActionLink("Forgot Password??", "ForgotPassword", "Account", null, new { @id = "ForgotPasswordLink" }) 
+            </p>
+        </div> 
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+
+        if (!('@ViewBag.LoginContent' == null || '@ViewBag.LoginContent' == ""))
+            alert(@ViewBag.LoginContent);
+    </script>
+}  <!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Login</title>
+        
+        <!-- Our CSS stylesheet file -->
+        <link rel="stylesheet" href="../../css/styles.css" />
+     
+    </head>
+    
+    <body>
+
+       
+      @using (Ajax.BeginForm("Login", "Account", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "ProfileUpdatedSuccess()"
+    } ))
+    {
+       
+       <input type="text" name="loginEmail" id="loginEmail" value="Email" />
+                <input type="password" name="loginPass" id="loginPass" value="pass" />
+       
+                @Html.Bootstrap().TextBoxFor(m => m.EmailAddress).Tooltip(new Tooltip("Email Address").Placement("top")).ShowValidationMessage(true)
+         
+                @Html.Bootstrap().PasswordFor(m => m.Password).Tooltip(new Tooltip("Password").Placement("top")).ShowValidationMessage(true)
+          
+       
+       @Html.Bootstrap().SubmitButton().Text("UPDATE PROFILE").HtmlAttributes(new{ @style="margin-top : 30px;margin-bottom : 30px;"})
+
+    }
+        <div id="formContainer">
+   
+            <form id="login" method="post" action="~/Account/Login">
+                <a href="#" id="flipToRecover" class="flipLink">Forgot?</a>
+               @Html.Bootstrap().TextBoxFor(m => m.EmailAddress).Placeholder("Email Address")
+                @Html.Bootstrap().PasswordFor(m => m.Password).Placeholder("Password")
+            <input type="submit" name="submit" value="LOGIN" /></form>
+        
+            
+            <form id="recover" method="post" action="./">
+                <a href="#" id="flipToLogin" class="flipLink">Forgot?</a>
+                <input type="text" name="recoverEmail" id="recoverEmail" value="Email" />
+                <input type="submit" name="submit" value="Recover" />
+            </form>
+        </div>
+
+     
+        
+        <!-- JavaScript includes 
+        <script src="~/Scripts/jquery-1.7.1.min.js"></script>-->
+        <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+		<script src="../../js/script.js"></script>
+
+    </body>
+</html>
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <!-- Our CSS stylesheet file -->
+        <link rel="stylesheet" href="../../css/styles.css" />
+         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+      
+        
+    </head>
+    
+    <body>
+        <div id="Error" title="Login Failed">
+        </div>
+		<div id="formContainer">
+			<form id="login" method="post" action="Account/Login">
+			    <a href="#" id="flipToRecover" class="flipLink">Forgot?</a>
+			    <input type="text" name="EmailAddress" id="EmailAddress" placeholder="Email" />
+                <input type="password" name="Password" id="Password" placeholder="Password" />
+			    <input id="LoginCheck" type="button" value="LOGIN" />
+
+			</form>
+			<form id="recover" method="post" action="./">
+				<a href="#" id="flipToLogin" class="flipLink">Forgot?</a>
+				<input type="text" name="recoverEmail" id="recoverEmail" placeholder="Email" />
+				<input id="ForgotPassword" type="button" value="Recover" />
+			</form>
+		</div>
+
+    
+      
+        <!-- JavaScript includes -->
+        <script src="~/Scripts/jquery-1.8.0.min.js"></script>
+        <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+		<script src="../../js/script.js"></script>
+        <script src="~/Scripts/progress.js"></script>
+        <script type="text/javascript">
+            $('#LoginCheck').click(function () {
+                var email = $("#EmailAddress").val();
+                var password = $("#Password").val();
+                $.ajax({
+                    url: 'Account/LoginShashka',
+                    type: 'POST',
+                    data: {
+                        email: email,
+                        password: password
+                    },
+
+                    beforeSend: function () { $.showprogress(); },
+                    success: function (msg) {
+                        if (msg === "success")
+                            window.location = "Account/UserProfile";
+                        else {
+                            $("#Error").dialog({
+                                title: "Login failed",
+                                show: {
+                                    effect: "blind",
+                                    duration: 1000
+                                },
+                                hide: {
+                                    effect: "explode",
+                                    duration: 1000
+                                }
+                            }).text("Your Email Address or Password is incorrect. Please Try Again");
+                        }
+                        $.hideprogress();
+                    },
+                    error: function (x) {
+                        alert("The call to the server side failed. " + x.responseText);
+
+                    }
+                });
+            });
+            
+            $('#ForgotPassword').click(function () {
+                var email = $("#recoverEmail").val();
+                $.ajax({
+                    url: 'Account/ForgotPassword',
+                    type: 'POST',
+                    data: {
+                        email: email
+                    },
+
+                    beforeSend: function () { $.showprogress(); },
+                    success: function (msg) {
+                            $("#Error").dialog({
+                                title: "Forgot Password Status",
+                                show: {
+                                    effect: "blind",
+                                    duration: 1000
+                                },
+                                hide: {
+                                    effect: "explode",
+                                    duration: 1000
+                                }
+                            }).text(msg);
+                        $.hideprogress();
+                    },
+                    error: function (x) {
+                        alert("The call to the server side failed. " + x.responseText);
+
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
+
+ *@ 

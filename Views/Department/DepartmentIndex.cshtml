@@ -1,0 +1,235 @@
+﻿@using TwitterBootstrap2
+@using TwitterBootstrapMVC
+@model NTU.Models.Departments
+@{
+    ViewBag.Title = "Department";
+}
+<script src="~/Scripts/jquery-1.8.0.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+@Html.Bootstrap().Button().Id("AddDepartmentButton").Text("Add Department").HtmlAttributes(new{@style="position: absolute;z-index:99;margin-left:250px; margin-top:8px;"})
+
+
+
+<div id="MessageStatus"></div>
+
+<div id="AddDepartment" style="display: none;">
+
+    @using (Ajax.BeginForm("UpdateDepartment", "Department", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "DepartmentUpdatedSuccess(data)"
+    }))
+    {
+        @Html.AntiForgeryToken()
+        <table>
+           
+            <tr><td>
+                         <div class="control-group">
+                             <div class="controls">
+                                 
+                            @Html.HiddenFor(m => m.DepartmentId)
+                                 @Html.Label("Department Name")
+                                 @Html.Bootstrap().TextBoxFor(m => m.DepartmentName).Tooltip(new Tooltip("Department Name").Placement("top")).ShowValidationMessage(true)
+                             </div>
+                         </div>
+                     </td></tr>
+            <tr><td>
+                    
+                   @Html.Bootstrap().SubmitButton().Text("SAVE").HtmlAttributes(new { @id="AddDepartmentButton", @class = "button", @style = "margin-top : 30px;margin-bottom : 30px;" })
+       
+                 </td><tr> </table>
+    }
+
+</div>
+
+<div id="DepartmentsTable" style = "margin: 30px auto 45px;width: 90%;">
+    <input type="hidden" id="SubmitStatus"/>
+    @using (Html.Bootstrap().Begin(new Table().Bordered().Hover().HtmlAttributes(new { @id = "tblDepartmentCollection", @class = "display stripe order-column"  })))
+    {
+
+        <thead>           
+            <tr>
+                <th>Sr No.</th>
+                <th>Department name</th>
+                <th>Created On</th>
+                <th>Last Updated</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="DepartmentInfo">
+            
+        </tbody>
+    }
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+<script type="text/javascript">
+    window.onload = function () {
+        GetAllDepartments();
+    };
+    GetAllDepartments = function () {
+        $.ajax({
+            type: "POST",
+            url: "GetAllDepartments",
+            contentType: "application/json; charset=utf-8",
+            //traditional: true,
+            dataType: "json",
+            beforeSend: function() { $.showprogress(); },
+            success: function(msg) {
+                // Replace the div's content with the page method's return.
+                if (msg != null) {
+                    $("#DepartmentInfo").html("");
+                    $('#tblDepartmentCollection').dataTable().fnDestroy();
+                    $('#DepartmentInfo').html(msg);
+                    $('#tblDepartmentCollection').dataTable({
+                        "iDisplayLength": 10,
+                        "aLengthMenu": [10, 25, 50, 100],
+                        "sPaginationType": "full_numbers",
+                        "oLanguage": {
+                            "sZeroRecords": "No records to display"
+                        },
+                        "sDom": '<"H"Tlf>t<"F"ip>',
+                        "oTableTools": {
+                            "sSwfPath": "../Content/copy_csv_xls_pdf.swf",
+                            "aButtons": [
+			"copy", "xls", "pdf"
+                            ]
+                        },
+                        "bDestroy": true,
+                        "bJQueryUI": true
+                    });
+                    $('#tblDepartmentCollection').css("width", "100%");
+                    $('#tblDepartmentCollection').css("margin-bottom", "0");
+                }
+
+                $.hideprogress();
+            },
+            error: function(x) {
+                alert("The call to the server side failed. " + x.responseText);
+            }
+        });
+
+    };
+    function DepartmentUpdatedSuccess(data) {
+        $("#AddDepartment").dialog("close");
+          //  $("html, body").animate({ scrollTop: 10 }, "fast");
+            $("#MessageStatus").dialog({
+                title: "Message Status",
+                show: { effect: "fadeIn", duration: 1000 },
+                hide: {
+                    effect: 'blind',
+                    duration: 1000
+                },
+                modal: true,
+                
+            });
+
+            $("#MessageStatus").html(data.param1);
+            GetAllDepartments();
+        
+        //setTimeout(showNotifications, 5000);
+        //function showNotifications() {
+        //    $("#UpdateStatusDiv").hide();
+        //}
+       // }
+        
+    }
+
+    $('#AddDepartmentButton').click(function () {
+        $("#DepartmentId").val("0");
+        $('#AddDepartment').dialog({
+            modal: true, 
+            show: { effect: "fadeIn", duration: 1000 },
+            hide: {
+                effect: 'blind',
+                duration: 1000
+            },
+            title : "Add Department",
+            width: "auto",
+            height: "auto"
+        });
+
+        $("html, body").animate({ scrollTop: 10 }, "fast");
+        resetCssOfFields(new Array("DepartmentName"));
+   
+    });
+    
+    EditDepartment = function (id) {
+        $("#DepartmentId").val(id);
+        resetCssOfFields(new Array("DepartmentName"));
+        $.ajax({
+            url: 'EditDepartment',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (msg) {
+                $('#AddDepartment').dialog({
+                    modal: true,
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    title: "Edit Department",
+                    width: "auto",
+                    height:"auto"
+                });
+
+                $("html, body").animate({ scrollTop: 10 }, "fast");
+                $("#DepartmentName").val(msg["DepartmentName"]);
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+    
+    DeleteDepartment = function (id) {
+            var r = confirm("Are you sure, You want to Delete this Department.");
+        if (!r)
+            return false;
+        $.ajax({
+            url: 'DeleteDepartment',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function() { $.showprogress(); },
+            success: function (data) {
+
+                $("#MessageStatus").dialog({
+                    title: "Delete Department Status",
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    modal: true,
+
+                });
+                $("#MessageStatus").html(data.param1);
+                GetAllDepartments();
+                $.hideprogress();
+            },
+            error: function(x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+
+</script>
+
+

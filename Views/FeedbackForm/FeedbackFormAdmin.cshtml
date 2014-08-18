@@ -1,0 +1,236 @@
+﻿@using TwitterBootstrap2
+@using TwitterBootstrapMVC
+@model NTU.Models.FeedbackForm
+@{
+    ViewBag.Title = "Feedback Form";
+}
+<script src="~/Scripts/jquery-1.8.0.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+@Html.Bootstrap().Button().Id("AddFeedbackFormButton").Text("Add Question").HtmlAttributes(new{@style="position: absolute;z-index:99;margin-left:250px; margin-top:8px;"})
+
+
+
+<div id="MessageStatus"></div>
+
+<div id="AddFeedbackForm" style="display: none;">
+
+    @using (Ajax.BeginForm("UpdateFeedbackForm", "FeedbackForm", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "FeedbackFormUpdatedSuccess(data, status, xhr)"
+    }))
+    {
+        @Html.AntiForgeryToken()
+        <table>
+           
+            <tr><td>
+                         <div class="control-group">
+                             <div class="controls">
+                                 
+                            @Html.HiddenFor(m => m.QuestionId)
+                                 @Html.Label("Question Text")
+                                 @Html.Bootstrap().TextBoxFor(m => m.QuestionText).Tooltip(new Tooltip("Question Text").Placement("top")).ShowValidationMessage(true)
+                             </div>
+                         </div>
+                     </td></tr>
+            <tr><td>
+                     <div class="control-group">
+                    <div class="controls">
+                        @Html.Bootstrap().SubmitButton().Text("SAVE").HtmlAttributes(new { @id="AddFeedbackFormButton", @class = "button", @style = "margin-top : 30px;margin-bottom : 30px;" })
+                    </div>
+                         </div>
+                 </td><tr> </table>
+    }
+
+</div>
+
+<div id="FeedbackFormsTable" style = "margin: 30px auto 45px;width: 90%;">
+    @using (Html.Bootstrap().Begin(new Table().Bordered().Hover().HtmlAttributes(new { @id = "tblFeedbackFormCollection", @class = "display stripe order-column"  })))
+    {
+
+        <thead>           
+            <tr>
+                <th>Sr No.</th>
+                <th style="width: 615px;">Question Text</th>
+                <th>Created On</th>
+                <th>Last Updated</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="FeedbackFormInfo">
+            
+        </tbody>
+    }
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+<script type="text/javascript">
+    window.onload = function () {
+        GetAllQuestionsFromFeedbackForm();
+    };
+    GetAllQuestionsFromFeedbackForm = function () {
+        $.ajax({
+            type: "POST",
+            url: "GetAllQuestionsForAdmin",
+            contentType: "application/json; charset=utf-8",
+            //traditional: true,
+            dataType: "json",
+            beforeSend: function() { $.showprogress(); },
+            success: function(msg) {
+                // Replace the div's content with the page method's return.
+                if (msg != null) {
+                    $("#FeedbackFormInfo").html("");
+                    $('#tblFeedbackFormCollection').dataTable().fnDestroy();
+                    $('#FeedbackFormInfo').html(msg);
+                    $('#tblFeedbackFormCollection').dataTable({
+                        "iDisplayLength": 10,
+                        "aLengthMenu": [10, 25, 50, 100],
+                        "sPaginationType": "full_numbers",
+                        "sDom": '<"H"Tlf>t<"F"ip>',
+                        "oTableTools": {
+                            "sSwfPath": "../Content/copy_csv_xls_pdf.swf",
+                            "aButtons": [
+			"copy", "xls", "pdf"
+                            ]
+                        },
+                        "oLanguage": {
+                            "sZeroRecords": "No records to display"
+                        },
+                        "bDestroy": true,
+                        "bJQueryUI": true
+                    });
+                    $('#tblFeedbackFormCollection').css("width", "100%");
+                    $('#tblFeedbackFormCollection').css("margin-bottom", "0");
+                }
+
+                $.hideprogress();
+            },
+            error: function(x, e) {
+                alert("The call to the server side failed. " + x.responseText);
+            }
+        });
+
+    };
+    function FeedbackFormUpdatedSuccess(data, status, xhr) {
+        $("#AddFeedbackForm").dialog("close");
+          //  $("html, body").animate({ scrollTop: 10 }, "fast");
+            $("#MessageStatus").dialog({
+                title: "Message Status",
+                modal: true,
+                show: { effect: "fadeIn", duration: 1000 },
+                hide: {
+                    effect: 'blind',
+                    duration: 1000
+                },
+                
+            });
+
+            $("#MessageStatus").html(data.param1);
+            GetAllQuestionsFromFeedbackForm();
+        
+        //setTimeout(showNotifications, 5000);
+        //function showNotifications() {
+        //    $("#UpdateStatusDiv").hide();
+        //}
+       // }
+        
+    }
+
+    $('#AddFeedbackFormButton').click(function () {
+        $("#QuestionId").val("0");
+        $('#AddFeedbackForm').dialog({
+            modal: true, 
+            show: { effect: "fadeIn", duration: 1000 },
+            hide: {
+                effect: 'blind',
+                duration: 1000
+            },
+            title : "Add FeedbackForm",
+            width: "auto",
+            height: "auto"
+        });
+
+        $("html, body").animate({ scrollTop: 10 }, "fast");
+        resetCssOfFields(new Array("QuestionText"));
+   
+    });
+    
+    EditFeedbackForm = function (id) {
+        $("#QuestionId").val(id);
+        resetCssOfFields(new Array("QuestionText"));
+        $.ajax({
+            url: 'EditQuestionInFeedbackForm',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (msg) {
+                $('#AddFeedbackForm').dialog({
+                    modal: true,
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    title: "Edit FeedbackForm",
+                    width: "auto",
+                    height:"auto"
+                });
+
+                $("html, body").animate({ scrollTop: 10 }, "fast");
+                $("#QuestionText").val(msg["QuestionText"]);
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+    
+    DeleteFeedbackForm = function (id) {
+            var r = confirm("Are you sure, You want to Delete this Question.");
+        if (!r)
+            return false;
+        $.ajax({
+            url: 'DeleteQuestionInFeedbackForm',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function() { $.showprogress(); },
+            success: function (data, status, xhr) {
+
+                $("#MessageStatus").dialog({
+                    title: "Delete Question Status",
+                    modal: true,
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+
+                });
+                $("#MessageStatus").html(data.param1);
+                GetAllQuestionsFromFeedbackForm();
+                $.hideprogress();
+            },
+            error: function(x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+
+</script>
+
+

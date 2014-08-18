@@ -1,0 +1,278 @@
+﻿@using TwitterBootstrap2
+@using TwitterBootstrapMVC
+@{
+    ViewBag.Title = "Student Info";
+}
+<script src="~/Scripts/jquery-1.8.0.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div id="CourseDesAssign"></div>
+@*
+@Html.Bootstrap().Button().Id("AddStudentButton").Text("Add Student").HtmlAttributes(new{@style="position: absolute;z-index:99;margin-left:250px; margin-top:8px;"})
+
+
+
+<div id="MessageStatus"></div>
+
+<div id="AddStudent" style="display: none;">
+
+    @using (Ajax.BeginForm("UpdateStudent", "Student", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "StudentUpdatedSuccess(data, status, xhr)"
+    }))
+    {
+        @Html.AntiForgeryToken()
+        <table>
+           
+            <tr><td>
+                    <div class="control-group">
+                        <div class="controls">
+                            @Html.HiddenFor(m => m.ModelId)
+                            @Html.Label("First Name")
+                            @Html.Bootstrap().TextBoxFor(m => m.FirstName).Tooltip(new Tooltip("First Name").Placement("top")).ShowValidationMessage(true)
+                        </div>
+                    </div>
+                </td><td>
+                         <div class="control-group">
+                             <div class="controls">
+                                 @Html.Label("Last Name")
+                                 @Html.Bootstrap().TextBoxFor(m => m.LastName).Tooltip(new Tooltip("Last Name").Placement("top")).ShowValidationMessage(true)
+                             </div>
+                         </div>
+                     </td></tr>
+            <tr><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("User Name")
+                    @Html.Bootstrap().TextBoxFor(m => m.UserName).Tooltip(new Tooltip("User Name").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+                </td><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Email Address")
+                    @Html.Bootstrap().TextBoxFor(m => m.EmailAddress).Tooltip(new Tooltip("Email Address").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+                    </td></tr>
+                <tr><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Password")
+                    @Html.Bootstrap().PasswordFor(m => m.Password).Tooltip(new Tooltip("Password").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+                    </td><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Confirm Password")
+                    @Html.Bootstrap().PasswordFor(m => m.ConfirmPassword).Tooltip(new Tooltip("Confirm Password").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+                        </td></tr>
+        <tr><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Phone Number")
+                    @Html.Bootstrap().TextBoxFor(m => m.PhoneNumber).Tooltip(new Tooltip("Phone Number").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+            </td><td>
+                    
+                   @Html.Bootstrap().SubmitButton().Text("SAVE").HtmlAttributes(new { @id="AddStudentButton", @class = "button", @style = "margin-top : 30px;margin-bottom : 30px;" })
+       
+                 </td><tr> </table>
+    }
+
+</div>*@
+<div id="StudentsTable" style = "margin: 30px auto 45px;width: 90%;">
+    <input type="hidden" id="SubmitStatus"/>
+    @using (Html.Bootstrap().Begin(new Table().Bordered().Hover().HtmlAttributes(new { @id = "tblStudentCollection", @class = "display stripe order-column"  })))
+    {
+
+        <thead>           
+            <tr>
+                <th>Sr No.</th>
+                <th>First Name</th>
+                <th>Last name</th>
+                <th>Email Address</th>
+                <th>User Name</th>
+                <th>Roll No.</th>
+                <th>Department</th>
+                <th>Semmester</th>
+                <th>Phone Number</th>
+                <th>Course Details</th>
+            </tr>
+        </thead>
+        <tbody id="StudentInfo">
+            
+        </tbody>
+    }
+</div>
+<div id="CourseDetails" style="display: none;">
+    @using (Html.Bootstrap().Begin(new Table().Bordered().Hover().HtmlAttributes(new { @id = "tblCourseDetailsCollection", @class = "display stripe order-column" })))
+    {
+
+        <thead>
+            <tr>
+                <th>Sr No.</th>
+                <th>Course Code</th>
+                <th>Course Name</th>
+                <th>Section</th>
+                <th>De-Assign Course</th>
+            </tr>
+        </thead>
+        <tbody id="CourseDetailsBody">
+        </tbody>
+    }
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+<script type="text/javascript">
+
+       var assignCourseTable2;
+    
+    window.onload = function () {
+        GetAllStudents();
+    };
+    GetAllStudents = function (){
+        $.ajax({
+            type: "POST",
+            url: "GetAllStudents",
+            contentType: "application/json; charset=utf-8",
+            //traditional: true,
+            dataType: "json",
+            beforeSend: function() { $.showprogress(); },
+            success: function(msg) {
+                // Replace the div's content with the page method's return.
+                if (msg != null) {
+                    $("#StudentInfo").html("");
+                    $('#tblStudentCollection').dataTable().fnDestroy();
+                    $('#StudentInfo').html(msg);
+                       $('#tblStudentCollection').dataTable({
+                        "iDisplayLength": 10,
+                        "aLengthMenu": [10, 25, 50, 100],
+                        "sPaginationType": "full_numbers",
+                        "oLanguage": {
+                            "sZeroRecords": "No records to display"
+                        },
+                        "sDom": '<"H"Tlf>t<"F"ip>',
+                        "oTableTools": {
+                            "sSwfPath": "../Content/copy_csv_xls_pdf.swf",
+                            "aButtons": [
+                                "copy", "xls", "pdf"
+                            ]
+                        },
+                        "bDestroy": true,
+                        "bJQueryUI": true
+                    });
+
+                    $('#tblStudentCollection').css("width", "100%");
+                    $('#tblStudentCollection').css("margin-bottom", "0");
+                }
+
+                $.hideprogress();
+            },
+            error: function(x) {
+                alert("The call to the server side failed. " + x.responseText);
+            }
+        });
+
+    };
+  
+    DeleteCourseAssignment = function (courseId, sectionId, userId, thisValue) {
+        var r = confirm("Are you sure, You want to De-Assign this Course.");
+        if (!r)
+            return false;
+        $.ajax({
+            url: 'DeAssignCourse',
+            type: 'POST',
+            data: {
+                courseId: courseId,
+                sectionId: sectionId,
+                userId: userId
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+                if (data != null) {
+                    $('#CourseDesAssign').dialog({
+                        modal: true,
+                        width: "auto",
+                        title: "De-Assign Course Status",
+                        height: "auto", show: { effect: "fadeIn", duration: 1000 },
+                        hide: {
+                            effect: 'blind',
+                            duration: 1000
+                        },
+                        position: "center"
+                    });
+                    $('#CourseDesAssign').html(data.param1);
+                    if (data.param1 == "<p style=\"color:green;font-weight:bold;\">Course is De-Assigned successfully.</p>") {
+                        var targetRow = $(thisValue).closest("tr").get(0);
+                        var aPos = assignCourseTable2.fnGetPosition(targetRow);
+                        assignCourseTable2.fnDeleteRow(aPos);
+                    }
+                }
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+
+    ViewCourseDetails = function (id, firstName, lastName) {
+
+        $.ajax({
+            url: 'GetCourseDetails',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+                if (data != null) {
+                    $('#CourseDetailsBody').html("");
+                    $('#tblCourseDetailsCollection').dataTable().fnDestroy();
+                    $('#CourseDetailsBody').html(data.param1);
+                    assignCourseTable2 = $('#tblCourseDetailsCollection').dataTable({
+                        "iDisplayLength": 5,
+                        "aLengthMenu": [5, 10, 25, 50, 100],
+                        "sPaginationType": "full_numbers",
+                        "oLanguage": {
+                            "sZeroRecords": "No records to display"
+                        },
+                        "bDestroy": true,
+                        "bJQueryUI": true
+                    });
+                    $('#tblCourseDetailsCollection').css("width", "100%");
+                    $('#tblCourseDetailsCollection').css("margin-bottom", "0");
+                    $('#CourseDetails').dialog({
+                        modal: true,
+                        title: "Course Details Of " + firstName + " " + lastName,
+                        width: "1000px",
+                        show: { effect: "fadeIn", duration: 1000 },
+                        hide: {
+                            effect: 'blind',
+                            duration: 1000
+                        },
+                        height: "auto",
+                        position: "center"
+                    });
+                }
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+</script>

@@ -1,0 +1,257 @@
+﻿@using TwitterBootstrap2
+@using TwitterBootstrapMVC
+@model NTU.Models.CourseDetails
+@{
+    ViewBag.Title = "Courses";
+}
+<script src="~/Scripts/jquery-1.8.0.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+@Html.Bootstrap().Button().Id("AddCourseButton").Text("Add Course").HtmlAttributes(new{@style="position: absolute;z-index:99;margin-left:250px; margin-top:8px;"})
+
+
+
+<div id="MessageStatus"></div>
+
+<div id="AddCourse" style="display: none;">
+
+    @using (Ajax.BeginForm("UpdateCourse", "Courses", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "CourseUpdatedSuccess(data, status, xhr)"
+    }))
+    {
+        @Html.AntiForgeryToken()
+        <table>
+           
+            <tr><td>
+                    <div class="control-group">
+                        <div class="controls">
+                            @Html.HiddenFor(m => m.Course.CourseId)
+                            @Html.Label("Course Code")
+                            @Html.Bootstrap().TextBoxFor(m => m.Course.CourseCode).Tooltip(new Tooltip("Course Code").Placement("right")).ShowValidationMessage(true)
+                        </div>
+                    </div>
+                </td><td>
+                         <div class="control-group">
+                             <div class="controls">
+                                 @Html.Label("Course Name")
+                                 @Html.Bootstrap().TextBoxFor(m => m.Course.CourseName).Tooltip(new Tooltip("Course Name").Placement("top")).ShowValidationMessage(true)
+                             </div>
+                         </div>
+                     </td></tr>
+            <tr><td>   <div class="control-group">
+                          <div class="controls">
+                              @Html.Label("Department")
+                            
+                              @Html.Bootstrap().DropDownListFor(m=> m.Departments.DepartmentId, new SelectList((System.Collections.IEnumerable) ViewData["DepartmentList"], "Value", "Text"))
+                          </div>
+            </div>
+           </td><td>
+                  <div class="control-group">
+                          <div class="controls">  
+                   @Html.Bootstrap().SubmitButton().Text("SAVE").HtmlAttributes(new { @id="AddCourseButton", @class = "button", @style = "margin-top : 25px;height : 50px;" })
+        </div>
+            </div>
+                 </td><tr> </table>
+    }
+
+</div>
+
+<div id="CoursesTable" style = "margin: 30px auto 45px;width: 90%;">
+    <input type="hidden" id="SubmitStatus"/>
+    @using (Html.Bootstrap().Begin(new Table().Bordered().Hover().HtmlAttributes(new { @id = "tblCourseCollection", @class = "display stripe order-column"  })))
+    {
+
+        <thead>           
+            <tr>
+                <th>Sr No.</th>
+                <th>Course Code</th>
+                <th>Course name</th>
+                <th>Department</th>
+                <th>Created On</th>
+                <th>Last Updated</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="CourseInfo">
+            
+        </tbody>
+    }
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+<script type="text/javascript">
+    window.onload = function () {
+        GetAllCourses();
+    };
+    GetAllCourses = function () {
+        $.ajax({
+            type: "POST",
+            url: "GetAllCourses",
+            contentType: "application/json; charset=utf-8",
+            //traditional: true,
+            dataType: "json",
+            beforeSend: function() { $.showprogress(); },
+            success: function(msg) {
+                // Replace the div's content with the page method's return.
+                if (msg != null) {
+                    $("#CourseInfo").html("");
+                    $('#tblCourseCollection').dataTable().fnDestroy();
+                    $('#CourseInfo').html(msg);
+              $('#tblCourseCollection').dataTable({
+                        "iDisplayLength": 10,
+                        "aLengthMenu": [10, 25, 50, 100],
+                        "sPaginationType": "full_numbers",
+                        "oLanguage": {
+                            "sZeroRecords": "No records to display"
+                        },
+                        "sDom": '<"H"Tlf>t<"F"ip>',
+                        "oTableTools": {
+                            "sSwfPath": "../Content/copy_csv_xls_pdf.swf",
+                            "aButtons": [
+			"copy", "xls", "pdf"
+                            ]
+                        },
+                        "bDestroy": true,
+                        "bJQueryUI": true
+                    });
+                    $('#tblCourseCollection').css("width", "100%");
+                    $('#tblCourseCollection').css("margin-bottom", "0");
+                }
+
+                $.hideprogress();
+            },
+            error: function(x, e) {
+                alert("The call to the server side failed. " + x.responseText);
+            }
+        });
+
+    };
+    function CourseUpdatedSuccess(data, status, xhr) {
+        $("#AddCourse").dialog("close");
+          //  $("html, body").animate({ scrollTop: 10 }, "fast");
+            $("#MessageStatus").dialog({
+                title: "Message Status",
+                show: { effect: "fadeIn", duration: 1000 },
+                hide: {
+                    effect: 'blind',
+                    duration: 1000
+                },
+                modal: true,
+                
+            });
+
+            $("#MessageStatus").html(data.param1);
+            GetAllCourses();
+        
+        //setTimeout(showNotifications, 5000);
+        //function showNotifications() {
+        //    $("#UpdateStatusDiv").hide();
+        //}
+       // }
+        
+    }
+
+    $('#AddCourseButton').click(function () {
+        $("#Course_CourseId").val("0");
+        $('#AddCourse').dialog({
+            modal: true, 
+            show: { effect: "fadeIn", duration: 1000 },
+            hide: {
+                effect: 'blind',
+                duration: 1000
+            },
+            title : "Add Course",
+            width: "auto",
+            height: "auto"
+        });
+
+        $("html, body").animate({ scrollTop: 10 }, "fast");
+        resetCssOfFields(new Array("Course_CourseCode", "Course_CourseName","Departments_DepartmentId"));
+   
+    });
+    
+    EditCourse = function (id) {
+        $("#Course_CourseId").val(id);
+        $.ajax({
+            url: 'EditCourse',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (msg) {
+                $('#AddCourse').dialog({
+                    modal: true,
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    title: "Edit Course",
+                    width: "auto",
+                    height:"auto"
+                });
+
+                resetCssOfFields(new Array("Course_CourseCode", "Course_CourseName", "Departments_DepartmentId"));
+                $("html, body").animate({ scrollTop: 10 }, "fast");
+                $("#Course_CourseCode").val(msg["CourseCode"]);
+                $("#Course_CourseName").val(msg["CourseName"]);
+                $("#Departments_DepartmentId").val(msg["DepartmentId"]);
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+    
+    DeleteCourse = function (id) {
+            var r = confirm("Are you sure, You want to Delete this Course.");
+        if (!r)
+            return false;
+        $.ajax({
+            url: 'DeleteCourse',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function() { $.showprogress(); },
+            success: function (data, status, xhr) {
+
+                $("#MessageStatus").dialog({
+                    title: "Delete Course Status",
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    modal: true,
+                    width: "300px",
+                    height: "auto"
+
+                });
+                $("#MessageStatus").html(data.param1);
+                GetAllCourses();
+                $.hideprogress();
+
+            },
+            error: function(x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+
+</script>
+
+

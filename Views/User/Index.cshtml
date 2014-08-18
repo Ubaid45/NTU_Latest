@@ -1,0 +1,378 @@
+﻿@using TwitterBootstrap2
+@using TwitterBootstrapMVC
+@model NTU.Models.UserDetails
+@{
+    ViewBag.Title = "User";
+    var roleList = new List<SelectListItem>
+   {
+      
+       new SelectListItem
+       {
+           Text = "Quality Team",
+           Value = "1"
+       },
+       new SelectListItem
+       {
+           Text = "Student",
+           Value = "2"
+       },
+       new SelectListItem
+       {
+           Text = "Teacher",
+           Value = "3"
+       }
+   };
+}
+<script src="~/Scripts/jquery-1.8.0.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+@Html.Bootstrap().Button().Id("AddUserButton").Text("Add User").HtmlAttributes(new{@style="position: absolute;z-index:99;margin-left:250px; margin-top:8px;"})
+
+<div id="MessageStatus"></div>
+<div id="AddUser" style="display: none;">
+
+    @using (Ajax.BeginForm("UpdateUser", "User", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "UserUpdatedSuccess(data, status, xhr)"
+    }))
+    {
+        @Html.AntiForgeryToken()
+        <table>
+           
+            <tr><td>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="hidden" autofocus="autofocus" />
+                            @Html.HiddenFor(m => m.RegisterViewModel.ModelId)
+                            @Html.Label("First Name")
+                            @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.FirstName).Tooltip(new Tooltip("First Name").Placement("right")).ShowValidationMessage(true)
+                        </div>
+                    </div>
+                </td><td>
+                         <div class="control-group">
+                             <div class="controls">
+                                 @Html.Label("Last Name")
+                                 @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.LastName).Tooltip(new Tooltip("Last Name").Placement("top")).ShowValidationMessage(true)
+                             </div>
+                         </div>
+                     </td></tr>
+            <tr><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("User Name")
+                    @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.UserName).Tooltip(new Tooltip("User Name").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+                </td><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Email Address")
+                    @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.EmailAddress).Tooltip(new Tooltip("Email Address").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+                    </td></tr>
+               <tr><td>
+            
+ <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Password")
+                    @Html.Bootstrap().PasswordFor(m => m.RegisterViewModel.Password).Tooltip(new Tooltip("Password").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+                    </td><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Confirm Password")
+                    @Html.Bootstrap().PasswordFor(m => m.RegisterViewModel.ConfirmPassword).Tooltip(new Tooltip("Confirm Password").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+                        </td></tr>
+        <tr><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Phone Number")
+                    @Html.Bootstrap().TextBoxFor(m => m.RegisterViewModel.PhoneNumber).Tooltip(new Tooltip("Phone Number").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+            </td><td>
+                      <div class="control-group">
+                          <div class="controls" style="margin-top: -18px;">
+                              @Html.Label("Role")
+                            
+                              @Html.Bootstrap().DropDownListFor(model => model.RegisterViewModel.RoleId, roleList)
+                          </div>
+            </div>
+                 </td></tr> 
+              <tr id="RoleNum" style="display: none;"><td>
+            <div class="control-group">
+                <div class="controls">
+                    @Html.Label("Roll Number")
+                    @Html.Bootstrap().TextBoxFor(m => m.StudentViewModel.RollNumber).Tooltip(new Tooltip("Roll Number").Placement("top")).ShowValidationMessage(true)
+                </div>
+            </div>
+            </td><td>
+                      <div class="control-group">
+                          <div class="controls" style="margin-top: -18px;">
+                              @Html.Label("Department")
+                            
+                              @Html.Bootstrap().DropDownListFor(m=> m.StudentViewModel.DepartmentId, new SelectList((System.Collections.IEnumerable) ViewData["DepartmentList"], "Value", "Text"))
+                          </div>
+            </div>
+                 </td></tr> 
+            <tr><td>
+                    <div id="Semmester" style="display: none;">
+                        <div class="control-group">
+                            <div class="controls">
+                                @Html.Label("Semmeseter")
+                            
+                                @Html.Bootstrap().TextBoxFor(m => m.StudentViewModel.Semester).Tooltip(new Tooltip("Semmerster").Placement("top")).ShowValidationMessage(true)
+                            </div>
+                        </div>
+
+                    </div>
+                </td><td>
+                        @Html.Bootstrap().SubmitButton().Text("SAVE").HtmlAttributes(new { @id="AddTeacherButton", @class = "button", @style = "margin-top : 30px;margin-bottom : 30px;height:50px;" })
+             
+                         </td></tr></table>
+    }
+
+</div>
+<div id="UsersTable" style = "margin: 30px auto 45px;width: 90%;display:none;">
+  @using (Html.Bootstrap().Begin(new Table().Bordered().Hover().HtmlAttributes(new { @id = "tblUserCollection", @class = "display stripe order-column"  })))
+                            {
+
+                                <thead>           
+                                    <tr>
+                                        <th>Sr No.</th>
+                                        <th>First Name</th>
+                                        <th>Last name</th>
+                                        <th>Email Address</th>
+                                        <th>User Name</th>
+                                        <th>Role</th>
+                                        <th>Phone Number</th>
+                                        <th>Creation Date</th>
+                                        <th>Last Updated</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="UserInfo">
+            
+                                </tbody>
+                            }
+    </div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+<script type="text/javascript">
+    var userTable;
+    window.onload = function () {
+        GetAllUsers();
+    };
+    $('#RegisterViewModel_RoleId').change(function () {
+        if ($('#RegisterViewModel_RoleId').val() == "2") {
+            $('#RoleNum').show();
+            $('#Semmester').show();
+        } else {
+            $('#RoleNum').hide();
+            $('#Semmester').hide();
+        }
+      
+    });
+    GetAllUsers = function (){
+        $.ajax({
+            type: "POST",
+            url: "GetAllUsers",
+            contentType: "application/json; charset=utf-8",
+            //traditional: true,
+            dataType: "json",
+            beforeSend: function() { $.showprogress(); },
+            success: function(msg) {
+                // Replace the div's content with the page method's return.
+                if (msg != null) {
+                    $('#UserInfo').html("");
+                    $('#tblUserCollection').dataTable().fnDestroy();
+                    $('#UserInfo').html(msg);
+                    userTable=   $('#tblUserCollection').dataTable({
+                        "iDisplayLength": 10,
+                        "aLengthMenu": [5, 10, 25, 50, 100],
+                        "sPaginationType": "full_numbers",
+                        "oLanguage": {
+                            "sZeroRecords": "No records to display"
+                        }, "sDom": '<"H"Tlf>t<"F"ip>',
+                        "oTableTools": {
+                            "sSwfPath": "../Content/copy_csv_xls_pdf.swf",
+                            "aButtons": [
+                                "copy", "xls", "pdf"
+                            ]
+                        },
+                        "bDestroy": true,
+                        "bJQueryUI": true
+                    });
+                    $('#UsersTable').show();
+                    $('#tblUserCollection').css("width", "100%");
+                    $('#tblUserCollection').css("margin-bottom", "0");
+                }
+
+                $.hideprogress();
+            },
+            error: function(x, e) {
+                alert("The call to the server side failed. " + x.responseText);
+            }
+        });
+
+    };
+    function UserUpdatedSuccess(data, status, xhr) {
+        $("#AddUser").dialog("close");
+        //  $("html, body").animate({ scrollTop: 10 }, "fast");
+        $("#MessageStatus").dialog({
+            title: "Message Status",
+            show: { effect: "fadeIn", duration: 1000 },
+            hide: {
+                effect: 'blind',
+                duration: 1000
+            },
+            modal: true,
+
+        });
+
+        $("#MessageStatus").html(data.param1);
+        GetAllUsers();
+
+        //setTimeout(showNotifications, 5000);
+        //function showNotifications() {
+        //    $("#UpdateStatusDiv").hide();
+        //}
+        // }
+
+    }
+
+    $('#AddUserButton').click(function () {
+        $("#RegisterViewModel_ModelId").val("0");
+        $('#AddUser').dialog({
+            modal: true,
+            show: { effect: "fadeIn", duration: 1000 },
+            hide: {
+                effect: 'blind',
+                duration: 1000
+            },
+            title: "Add User",
+            width: "auto",
+            height: "auto"
+        });
+
+        $("html, body").animate({ scrollTop: 10 }, "fast");
+        $('#RoleNum').hide();
+        $('#Semmester').hide();
+        resetCssOfFields(new Array("RegisterViewModel_FirstName", "RegisterViewModel_LastName", "RegisterViewModel_UserName",
+            "RegisterViewModel_UserName", "RegisterViewModel_EmailAddress", "RegisterViewModel_Password", "RegisterViewModel_ConfirmPassword",
+            "RegisterViewModel_PhoneNumber", "RegisterViewModel_RoleId", "StudentViewModel_RollNumber", "StudentViewModel_DepartmentId",
+            "StudentViewModel_Semester"));
+        $("#RegisterViewModel_UserName").prop("disabled", false);
+        $("#RegisterViewModel_EmailAddress").prop("disabled", false);
+        $("#RegisterViewModel_RoleId").val(1);
+        $("#RegisterViewModel_RoleId").prop("disabled", false);
+    });
+
+    EditUser = function (id) {
+        $("#RegisterViewModel_ModelId").val(id);
+        $.ajax({
+            url: 'EditUser',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (msg) {
+                $('#AddUser').dialog({
+                    modal: true,
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    title: "Edit User",
+                    width: "auto",
+                    height: "auto"
+                });
+
+                $("html, body").animate({ scrollTop: 10 }, "fast");
+                resetCssOfFields(new Array("RegisterViewModel_FirstName", "RegisterViewModel_LastName", "RegisterViewModel_UserName",
+                    "RegisterViewModel_UserName", "RegisterViewModel_EmailAddress", "RegisterViewModel_Password", "RegisterViewModel_ConfirmPassword",
+                    "RegisterViewModel_PhoneNumber", "RegisterViewModel_RoleId", "StudentViewModel_RollNumber", "StudentViewModel_DepartmentId",
+                    "StudentViewModel_Semester"));
+
+                $("#RegisterViewModel_FirstName").val(msg.RegisterViewModel.FirstName);
+                $("#RegisterViewModel_LastName").val(msg.RegisterViewModel.LastName);
+                $("#RegisterViewModel_UserName").val(msg.RegisterViewModel.UserName);
+                $("#RegisterViewModel_UserName").attr("disabled", "true");
+                $("#RegisterViewModel_EmailAddress").val(msg.RegisterViewModel.EmailAddress);
+                $("#RegisterViewModel_EmailAddress").attr("disabled", "true");
+                $("#RegisterViewModel_Password").val(msg.RegisterViewModel.Password);
+                $("#RegisterViewModel_ConfirmPassword").val(msg.RegisterViewModel.Password);
+                $("#RegisterViewModel_PhoneNumber").val(msg.RegisterViewModel.PhoneNumber);
+                $("#RegisterViewModel_RoleId").val(msg.RegisterViewModel.RoleId);
+                $("#RegisterViewModel_RoleId").prop("disabled", true);
+                if (msg.RegisterViewModel.RoleId == "2" || msg.RegisterViewModel.RoleId == 2) {
+                    $('#RoleNum').show();
+                    $('#Semmester').show();
+                    $("#StudentViewModel_RollNumber").val(msg.StudentViewModel.RollNumber);
+                    $("#StudentViewModel_DepartmentId").val(msg.StudentViewModel.DepartmentId);
+                    $("#StudentViewModel_Semester").val(msg.StudentViewModel.Semester);
+                } else {
+                    $('#RoleNum').hide();
+                    $('#Semmester').hide();
+                }
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+
+    DeleteUser = function (id,thisValue) {
+        var r = confirm("Are you sure, You want to Delete this Teacher.");
+        if (!r)
+            return false;
+        $.ajax({
+            url: 'DeleteUser',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+
+                $("#MessageStatus").dialog({
+                    title: "Delete User Status",
+                    show: { effect: "fadeIn", duration: 1000 },
+                    hide: {
+                        effect: 'blind',
+                        duration: 1000
+                    },
+                    modal: true,
+
+                });
+                $("#MessageStatus").html(data.param1);
+                if (data.param1 == "<p style=\"color:green;font-weight:bold;\">User is Deleted successfully.</p>") {
+                    var targetRow = $(thisValue).closest("tr").get(0);
+                        var aPos = userTable.fnGetPosition(targetRow);
+                        userTable.fnDeleteRow(aPos);
+                }
+             
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+        return true;
+    };
+
+</script>

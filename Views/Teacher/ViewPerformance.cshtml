@@ -1,0 +1,174 @@
+﻿@{
+    ViewBag.Title = "View Performance";
+}
+<center>
+     <div id="MessageStatus"></div>
+    <span style="padding: 10px; font-size: 17px;font-weight: bold;">Section: </span>
+      @Html.DropDownList("SectionDropdown", new SelectList((System.Collections.IEnumerable) ViewData["SectionList"], "Value", "Text"), "---Select One---",new { @onchange="ChangeSection(this.value);",@style="width: 300px !important;margin:10px !important;" })
+    <br />
+    <span style="padding: 10px; font-size: 17px;font-weight: bold;">Course: </span>
+  <select id="courseListForTeacher" style="width: 300px !important;margin:10px !important;" onchange="LoadPerformance(this.value);"></select>
+    <div id="container" style="margin-top : 20px;"></div>
+</center>
+<script type="text/javascript">
+    ChangeSection = function(id) {
+    
+        if (id == "") {
+            $('#courseListForTeacher').children().remove();
+            $("#container").hide();
+            return false;
+        }
+
+        $.ajax({
+            url: 'LoadCoursesBySectionId',
+            type: 'POST',
+            data: {
+                id: id
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+
+                $('#courseListForTeacher').children().remove();
+                $('#courseListForTeacher').append('<option value="0" >---Select One---</option>');
+                for (var i = 0; i < data.length; i++)
+                    $('#courseListForTeacher').append('<option value="' + data[i].CourseId + '" >' + data[i].CourseName + '</option>');
+                        $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+
+
+    };
+
+    LoadPerformance = function (courseId) {
+
+        if (courseId == "0") {
+            $("#container").hide();
+            return false;
+        }
+        var sectionId = $("#SectionDropdown").val();
+        $.ajax({
+            url: 'LoadPerformance',
+            type: 'POST',
+            data: {
+                sectionId: sectionId,
+                courseId: courseId
+                
+            },
+
+            beforeSend: function () { $.showprogress(); },
+            success: function (data) {
+                if (data.param1 == null) {
+                    $('#MessageStatus').dialog({
+                        modal: true,
+                        show: { effect: "fadeIn", duration: 1000 },
+                        hide: {
+                            effect: 'blind',
+                            duration: 1000
+                        },
+                        title: "Course Performance Status",
+                        width: "350px",
+                        height: "auto"
+                    });
+                    $('#MessageStatus').html("<p style=\"color:red;font-weight:bold;\">Sorry, Not any student of this section submitted feedback form for this course.</p>");
+                    $.hideprogress();
+                    return false;
+                }
+                var courseName = $("#courseListForTeacher option:selected").text();
+                var sectionName = $("#SectionDropdown option:selected").text();
+                var count = data.param1.length;
+                var xAxisArray = [];
+                var xAxisArray2 = [];
+                var stronglyAgreed = [];
+                var agreed = [];
+                var neutral = [];
+                var disAgreed = [];
+                var stronglyDisagreed = [];
+                for (var i = 0; i < count; i++) {
+                    if (i < count/5) {
+                        xAxisArray.push("Q" + (i + 1));
+                        xAxisArray2.push("Q" + (i));
+                         stronglyAgreed.push(data.param1[i]);
+                    }
+                    else if (i < ((count / 5) * 2))
+                        agreed.push(data.param1[i]);
+
+                    else if (i < ((count / 5) * 3))
+                        neutral.push(data.param1[i]);
+
+                    else if (i < ((count / 5) * 4))
+                        disAgreed.push(data.param1[i]);
+
+                    else
+                        stronglyDisagreed.push(data.param1[i]);
+                }
+                $('#container').highcharts({
+                    chart: {
+                        type: 'column',
+                        width: 1300
+                    },
+                    title: {
+                        text: 'Course Feedback of <b>' + courseName + '</b> in Section <b>' + sectionName + '</b>.'
+            },
+                    subtitle: {
+                        text: 'Hover the bar for its details.'
+                    },
+                    xAxis: {
+                        categories: xAxisArray,
+                        title: {
+                            text: 'Questions'
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Answers'
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:10px">{point.x}</span><table>',
+                        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                            '<td style="padding:0"><b>{point.y}</b></td></tr>',
+                        footerFormat: '</table>',
+                        shared: true,
+                        useHTML: true
+                    },
+                    series: [{
+                        name: 'Strongly Agree',
+                        data: stronglyAgreed
+
+                    }, {
+                        name: 'Agree',
+                        data: agreed
+
+                    }, {
+                        name: 'Neutral',
+                        data: neutral
+
+                    }, {
+                        name: 'Disagree',
+                        data: disAgreed
+
+                    },
+                    {
+                        name: 'Strongly Disagree',
+                        data: stronglyDisagreed
+
+                    }]
+                });
+                $("#container").show();
+                $.hideprogress();
+            },
+            error: function (x) {
+                alert("The call to the server side failed. " + x.responseText);
+
+            }
+        });
+
+
+    };
+</script>

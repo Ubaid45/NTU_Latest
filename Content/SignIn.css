@@ -1,0 +1,277 @@
+﻿/* .ui-btn.ui-shadow.ui-btn-corner-all.ui-btn-up-b {
+    margin-left: 10%;
+    width: 75%;
+}*/
+.help-inline {
+    display: inline-block;
+
+    vertical-align: middle;
+}
+.controls > select {
+    height: 50px;
+    padding: 13px;
+    width: 415px;
+}
+.button{
+	margin :0 auto;
+	width :415px !important;
+	display : block;
+    height: 45px;
+    background-color: #882843;
+    color: #fff;
+}
+.ImageContainer {
+    display: block;
+    margin: 0 auto;
+    width: 70%;
+    height: 40px;
+}
+ .Header {
+         background-color: #40638B;
+         width: 100%;
+         top: 0;
+         height: 70px;
+       
+     }
+     .Footer {
+         background-color: #40638B;
+         bottom: 0;
+    color: #FFFFFF;
+    font-size: 18px;
+    padding: 15px;
+    text-align: center;
+    width: 100%;
+
+     
+     }
+ .controls {
+    margin-left: 5%;
+    max-width: 90%;
+}
+ .help-inline {
+    display: inline-block;
+ 
+    vertical-align: middle;
+}
+ .ui-btn.ui-shadow.ui-btn-corner-all.ui-submit.ui-btn-up-b {
+    margin-left: 6%;
+    max-width: 88%;
+    line-height: 18px;
+}
+.ui-input-text.ui-body-b.ui-corner-all.ui-shadow-inset {
+    height: 40px;
+    max-width: 88%;
+    margin-left: 6%;
+}
+ .ui-btn.ui-shadow.ui-btn-corner-all.ui-submit.ui-btn-hover-b {
+    max-width: 88%;
+    margin-left: 6%;
+       line-height: 18px;
+}
+ #signupFields .ui-btn.ui-shadow.ui-btn-corner-all.ui-submit.ui-btn-hover-b {
+    max-width: 88%;
+    margin-left: 5%;
+       line-height: 18px;
+}
+
+#signupFields .ui-btn.ui-shadow.ui-btn-corner-all.ui-submit.ui-btn-up-b {
+    margin-left: 5%;
+    max-width: 88%;
+}
+#signupFields .ui-input-text.ui-body-b.ui-corner-all.ui-shadow-inset {
+    height: 40px;
+    margin-left: 8%;
+    max-width: 88%;
+    margin: 5px 12px 0 20px;
+    margin-left: 5%;
+}
+
+.SignUpText {
+    float : left;
+    width: 100%;
+}
+#image {
+    
+    /*background: url("../../Content/images/f-chat5.png") repeat scroll 0 0 ;*/
+    background-size: 100% 100%;
+}
+.SlicedImage {
+
+    float: left;
+    margin-top: -1.8%;
+    margin-left: 32%;
+    
+}
+/*.ui-focus, .ui-btn:focus {
+    border-color: green;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
+    outline: 0 none;
+}
+.ui-input-text.ui-body-b.ui-corner-all.ui-shadow-inset.ui-focus {
+    border: 1px solid green;
+}*/
+
+.WrapperDialougeSlider
+{
+  display:none;
+  margin-top:10px;
+}
+.DialougeSliderHead
+{
+  color: white; 
+  background-color: #1C4181;
+  height:40px;
+}
+.DialougeSliderHeadError
+{
+  color: white; 
+  background-color: #FFF8F6;
+  display:none;
+  width:500px;
+  height:40px;
+  margin-top:10px;
+  margin-bottom:5px;
+  z-index:1;
+}
+.DialougeSliderHeadText
+{
+    padding-top: 10px;
+     height: 30px; 
+     float: left;
+      margin-left: 25px;
+}
+.DialougeSlider
+{
+    padding-left:25px;
+   padding-right:20px;
+    margin-bottom:10px;
+    background-color: white; 
+}
+.DialougeSliderError
+{
+    display : none; 
+    text-align:left;
+    border: 1px solid gray;
+     width: 300px;
+      height: 80px;
+    margin-left: 135px;
+    margin-bottom: 20px;
+    background-color: rgb(235, 235, 235); 
+}
+.dataTables_filter input{
+        width: 200px;
+    height: 20px;
+    }
+
+#Profile .control-group {
+    padding: 10px;
+}
+.textfield
+{
+    border: 1px solid #D1E5EE;
+    font-family: Tahoma ,Verdana, Arial;
+    font-size: 12px;
+    color: Black;
+    background-color: #FFFFFF;
+    text-align: left;
+    -moz-border-radius: 10px 10px 0 0;
+	-webkit-border-radius: 0px 10px 0 0;	
+    padding: 5px 3px 3px 5px;
+    margin:5px 5px 5px 5px;
+    border-radius: 5px;
+    resize:none;
+    }
+.labelRPT
+{
+    font-family: Calibri;
+    font-size: 14px;
+    color: #104382;
+    
+}
+.DialougeSliderCloseImage
+{
+  padding-right:10px;
+   float:right; 
+   padding-top:12px;
+    z-index:2; 
+    cursor: pointer;
+}
+/*
+.DialougeSliderCloseImage
+{
+  padding-right:10px;
+   float:right; 
+   padding-top:11px;
+    z-index:2; 
+    cursor: pointer;
+}*/
+.DialougeSliderButton
+{
+    cursor:pointer;
+    float:right;
+    padding-right:5px;
+    padding-top:13px;
+    padding-bottom:15px;
+}
+.ChatImage {
+    
+     border-radius: 25px;
+     border: 10px solid #882843;
+     box-shadow: 5px 5px #515151;
+    height: auto;
+    margin-top: 50px;
+	 width : 550px;
+ }
+#signupFields .LoginLink {
+     padding: 2% 0 4% 5%;
+     float: left;
+}
+#ForgotPasswordLink {
+    cursor: pointer; 
+    float: right;
+    padding-right:65px; 
+}
+
+.Link {
+    cursor: pointer; 
+    float: left;
+   margin-left:5.2%; 
+   margin-bottom : 3%;
+}
+/*
+    height: 500px;
+     max-width: 600px;
+    position: absolute;
+    top: 75px;
+    width: 50%;
+}
+
+*/
+.Logo {
+    height:75px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+.tooltip-inner {
+    max-width: 200px;
+    font-size: 14px;
+}
+#RegisterImage {
+   width:165px;
+
+     position:absolute;
+      cursor: pointer;
+       z-index:10;
+}
+  #LoginLinkInRegister {
+        margin-left: 12%;
+        margin-top: 8px;
+    }
+ @media screen and (max-width: 400px) {
+     #ForgotPasswordLink {
+        cursor: pointer; 
+        float: left;
+        padding-left:5%;
+        margin-bottom: 15px;
+}
+ }
