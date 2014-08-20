@@ -27,14 +27,14 @@
     height: 40px;
 }
  .Header {
-         background-color: #40638B;
+         background-color: #882843;
          width: 100%;
          top: 0;
          height: 70px;
        
      }
      .Footer {
-         background-color: #40638B;
+         background-color: #882843;
          bottom: 0;
     color: #FFFFFF;
     font-size: 18px;
@@ -212,7 +212,7 @@
     padding-right:5px;
     padding-top:13px;
     padding-bottom:15px;
-}
+}.Footer
 .ChatImage {
     
      border-radius: 25px;
